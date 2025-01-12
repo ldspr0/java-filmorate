@@ -58,7 +58,6 @@ public class UserController {
             log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
             throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
         }
-        // проверяем выполнение необходимых условий
         if (newUser.getLogin() == null || newUser.getLogin().trim().contains(" ")) {
             log.warn(MSG_LOGIN_VALIDATION_ERROR);
             throw new ValidationException(MSG_LOGIN_VALIDATION_ERROR);
