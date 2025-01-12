@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -19,20 +20,10 @@ public class UserController {
         return users.values();
     }
 
-    /*
-    электронная почта не может быть пустой и должна содержать символ @;
-логин не может быть пустым и содержать пробелы;
-имя для отображения может быть пустым — в таком случае будет использован логин;
-дата рождения не может быть в будущем.
-     */
-
     @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
         // проверяем выполнение необходимых условий
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidationException("Не корректный адрес электронной почты.");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
+        if (user.getLogin() == null || user.getLogin().trim().contains(" ")) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         }
         if (user.getName() == null || user.getName().isBlank()) {
@@ -49,16 +40,13 @@ public class UserController {
 
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public User update(@Valid @RequestBody User newUser) {
         // проверяем необходимые условия
         if (newUser.getId() == null) {
             throw new ValidationException("Id должен быть указан");
         }
         // проверяем выполнение необходимых условий
-        if (newUser.getEmail() == null || newUser.getEmail().isBlank()) {
-            throw new ValidationException("Не корректный адрес электронной почты.");
-        }
-        if (newUser.getLogin() == null || newUser.getLogin().isBlank()) {
+        if (newUser.getLogin() == null || newUser.getLogin().trim().contains(" ")) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         }
         if (newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now())) {
@@ -67,15 +55,19 @@ public class UserController {
 
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
+            oldUser.setEmail(newUser.getEmail());
+            oldUser.setLogin(newUser.getLogin());
 
             if (newUser.getName() == null || newUser.getName().isBlank()) {
                 oldUser.setName(oldUser.getLogin());
             } else {
                 oldUser.setName(newUser.getName());
             }
+
             if (newUser.getBirthday() != null) {
                 oldUser.setBirthday(newUser.getBirthday());
             }
+
             return oldUser;
         }
 
