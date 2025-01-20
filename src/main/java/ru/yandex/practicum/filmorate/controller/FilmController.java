@@ -29,7 +29,7 @@ public class FilmController {
     public Film create(@Valid @RequestBody Film film) {
         log.info("input film: {}", film.toString());
 
-        if (!validation(film).equals("Success")) {
+        if (!"Success".equals(validation(film))) {
             String errorMessage = validation(film);
             log.warn(errorMessage);
             throw new ValidationException(errorMessage);
@@ -55,7 +55,7 @@ public class FilmController {
             throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
         }
 
-        if (!validation(newFilm).equals("Success")) {
+        if (!"Success".equals(validation(newFilm))) {
             String errorMessage = validation(newFilm);
             log.warn(errorMessage);
             throw new ValidationException(errorMessage);
