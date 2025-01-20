@@ -16,21 +16,18 @@ import java.util.Map;
 @Slf4j
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
-    private static final String MSG_NAME_VALIDATION_ERROR = "Имя фильма не должно быть пустым.";
-    private static final String MSG_DESCRIPTION_VALIDATION_ERROR = "Описание должно быть не более 200 символов.";
-    private static final String MSG_DURATION_VALIDATION_ERROR = "Описание должно быть не более 200 символов.";
     private static final String MSG_RELEASEDATE_VALIDATION_ERROR = "Дата релиза фильма не может быть раньше 28 декабря 1895 года.";
     private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
 
     @GetMapping
     public Collection<Film> findAll() {
+        log.trace("get all films: {}", films.values());
         return films.values();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.trace("input film:");
-        log.trace(film.toString());
+        log.info("input film: {}", film.toString());
 
         if (!validation(film).equals("Success")) {
             String errorMessage = validation(film);
@@ -46,15 +43,15 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
-        log.trace("input film:");
-        log.trace(newFilm.toString());
+        log.info("input film: {}", newFilm.toString());
+
         // проверяем необходимые условия
         if (newFilm.getId() == null) {
             log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
             throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
         }
         if (!films.containsKey(newFilm.getId())) {
-            log.warn("Фильм с id = " + newFilm.getId() + " не найден");
+            log.warn("Фильм с id = {} не найден", newFilm.getId());
             throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
         }
 
@@ -73,16 +70,6 @@ public class FilmController {
     }
 
     private String validation(Film film) {
-        // проверяем выполнение необходимых условий
-        if (film.getName() == null || film.getName().isBlank()) {
-            return MSG_NAME_VALIDATION_ERROR;
-        }
-        if (film.getDescription() != null && film.getDescription().length() > 200) {
-            return MSG_DESCRIPTION_VALIDATION_ERROR;
-        }
-        if (film.getDuration() != null && film.getDuration() < 0) {
-            return MSG_DURATION_VALIDATION_ERROR;
-        }
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             return MSG_RELEASEDATE_VALIDATION_ERROR;
         }

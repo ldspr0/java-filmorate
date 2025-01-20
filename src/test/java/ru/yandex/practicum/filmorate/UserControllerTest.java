@@ -16,6 +16,9 @@ import java.util.Optional;
 @SpringBootTest
 class UserControllerTest {
     private final UserController controller = new UserController();
+    private User updateUser;
+    private User userWithEmptyName;
+    private User userWithNoId;
 
     @BeforeEach
     void contextLoads() {
@@ -27,11 +30,8 @@ class UserControllerTest {
                 .build();
 
         controller.create(user);
-    }
 
-    @Test
-    public void isPossibleToUpdateUser() {
-        User newUser = User.builder()
+        this.updateUser = User.builder()
                 .id(1L)
                 .name("Xela Ivanov")
                 .login("AI2.1")
@@ -39,7 +39,24 @@ class UserControllerTest {
                 .birthday(LocalDate.of(1900, 5, 5))
                 .build();
 
-        controller.update(newUser);
+        this.userWithEmptyName = User.builder()
+                .id(1L)
+                .login("AI2.1")
+                .email("tset@tset.tset")
+                .birthday(LocalDate.of(1900, 5, 5))
+                .build();
+
+        this.userWithNoId = User.builder()
+                .name("Xela Ivanov")
+                .login("AI2.1")
+                .email("tset@tset.tset")
+                .birthday(LocalDate.of(1900, 5, 5))
+                .build();
+    }
+
+    @Test
+    public void isPossibleToUpdateUser() {
+        controller.update(updateUser);
 
         Optional<User> updatedUserOpt = controller.findAll().stream().findFirst();
         if (updatedUserOpt.isEmpty()) {
@@ -61,86 +78,8 @@ class UserControllerTest {
     }
 
     @Test
-    void isNotPossibleToCreateUserWithIncorrectEmail() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset.tsettset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        User newUserWithEmpty = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(newUser));
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(newUserWithEmpty));
-    }
-
-    @Test
-    void isNotPossibleToCreateUserWithSpacesInLoginOrWithoutLogin() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        User newUserWithSpaces = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI 2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(newUser));
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(newUserWithSpaces));
-    }
-
-    @Test
-    void isNotPossibleToCreateUserWithBirthdayInFuture() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.now().plusDays(1L))
-                .build();
-        User newUserWithout = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .build();
-        User newUserToday = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.now())
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(newUser));
-
-        controller.create(newUserWithout);
-        Assertions.assertEquals(2, controller.findAll().size());
-
-        controller.create(newUserToday);
-        Assertions.assertEquals(3, controller.findAll().size());
-    }
-
-    @Test
     void isPossibleToCreateUserWithEmptyName() {
-        User newUser = User.builder()
-                .id(2L)
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        controller.create(newUser);
+        controller.create(userWithEmptyName);
 
         List<User> userCreatedWithoutName = controller.findAll().stream()
                 .filter(user -> user.getId() == 2L && Objects.equals(user.getLogin(), user.getName()))
@@ -156,101 +95,12 @@ class UserControllerTest {
 
     @Test
     void isNotPossibleToUPdateUserWithNoId() {
-        User newUser = User.builder()
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUser));
-    }
-
-    @Test
-    void isNotPossibleToUpdateUserWithIncorrectEmail() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset.tsettset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        User newUserWithEmpty = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUser));
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUserWithEmpty));
-    }
-
-    @Test
-    void isNotPossibleToUpdateUserWithSpacesInLoginOrWithoutLogin() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        User newUserWithSpaces = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI 2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUser));
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUserWithSpaces));
-    }
-
-    @Test
-    void isNotPossibleToUpdateUserWithBirthdayInFuture() {
-        User newUser = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.now().plusDays(1L))
-                .build();
-        User newUserWithout = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .build();
-        User newUserToday = User.builder()
-                .id(1L)
-                .name("Xela Ivanov")
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.now())
-                .build();
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newUser));
-        Assertions.assertDoesNotThrow(() -> controller.update(newUserWithout));
-
-        controller.update(newUserToday);
-        Optional<User> updatedUserOpt = controller.findAll().stream().findFirst();
-        if (updatedUserOpt.isEmpty()) {
-            Assertions.fail("Юзер не найден.");
-        }
-
-        User updatedUser = updatedUserOpt.get();
-        Assertions.assertEquals(1, updatedUser.getId(), "Проверка id");
-        Assertions.assertEquals(LocalDate.now(), updatedUser.getBirthday(), "Проверка birthday");
+        Assertions.assertThrows(ValidationException.class, () -> controller.update(userWithNoId));
     }
 
     @Test
     void isPossibleToUpdateUserWithEmptyName() {
-        User newUser = User.builder()
-                .id(1L)
-                .login("AI2.1")
-                .email("tset@tset.tset")
-                .birthday(LocalDate.of(1900, 5, 5))
-                .build();
-        controller.update(newUser);
+        controller.update(userWithEmptyName);
 
         List<User> userCreatedWithoutName = controller.findAll().stream()
                 .filter(user -> user.getId() == 1L && Objects.equals(user.getLogin(), user.getName()))
