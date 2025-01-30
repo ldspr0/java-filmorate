@@ -1,92 +1,42 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final Map<Long, User> users = new HashMap<>();
-    private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
+    private final UserStorage userStorage;
 
     public Collection<User> findAll() {
-        log.trace("get all users: {}", users.values());
-        return users.values();
+        return userStorage.findAll();
     }
 
     public User create(User user) {
-        log.info("input user: {}", user.toString());
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.trace("name is set to login: {}", user.getLogin());
-        }
-
-        user.setId(getNextId());
-        users.put(user.getId(), user);
-        return user;
+        return userStorage.create(user);
     }
 
     public User update(User newUser) {
-        log.info("input user: {}", newUser.toString());
-
-        if (newUser.getId() == null) {
-            log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
-            throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
-        }
-
-        if (!users.containsKey(newUser.getId())) {
-            log.warn("Пользователь с id = {} не найден", newUser.getId());
-            throw new ValidationException("Пользователь с id = " + newUser.getId() + " не найден");
-        }
-
-        User oldUser = users.get(newUser.getId());
-        oldUser.setEmail(newUser.getEmail());
-        oldUser.setLogin(newUser.getLogin());
-
-        if (newUser.getName() == null || newUser.getName().isBlank()) {
-            oldUser.setName(oldUser.getLogin());
-            log.trace("name is set to login: {}", oldUser.getLogin());
-        } else {
-            oldUser.setName(newUser.getName());
-        }
-
-        if (newUser.getBirthday() != null) {
-            oldUser.setBirthday(newUser.getBirthday());
-        }
-
-        return oldUser;
+        return userStorage.update(newUser);
     }
 
-    public void addFriend(long userId, long friendId) {
-
+    public void addFriend(int id, int friendId) {
+        userStorage.addFriend(id, friendId);
     }
 
-    public void removeFriend(long userId, long friendId) {
-
+    public void removeFriend(int id, int friendId) {
+        userStorage.removeFriend(id, friendId);
     }
 
-    public Collection<User> getFriendList(long userId) {
-        return new ArrayList<>();
+    public Collection<User> getFriends(int id) {
+        return userStorage.getFriendList(id);
     }
 
-    public Collection<User> getCommonFriends(long userId, long secondUserId) {
-        return new ArrayList<>();
-    }
-
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    public Collection<User> getCommonFriends(int id, int otherId) {
+        return userStorage.getCommonFriends(id, otherId);
     }
 }
