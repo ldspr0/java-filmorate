@@ -4,16 +4,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootTest
 class FilmControllerTest {
-    private final FilmController controller = new FilmController();
+    private final FilmStorage controller = new InMemoryFilmStorage();
     private Film updateFilm;
     private Film newFilmBefore28;
     private Film newFilmAt28;
