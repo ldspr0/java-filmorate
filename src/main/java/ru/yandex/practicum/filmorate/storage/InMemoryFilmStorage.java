@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -17,6 +17,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private static final String MSG_RELEASEDATE_VALIDATION_ERROR = "Дата релиза фильма не может быть раньше 28 декабря 1895 года.";
     private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
+    @Autowired
+    UserStorage userStorage;
 
     @Override
     public Collection<Film> findAll() {
@@ -35,6 +37,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
 
         film.setId(getNextId());
+        film.setLikes(new HashSet<>());
         films.put(film.getId(), film);
         return film;
     }
@@ -48,10 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
             throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
         }
-        if (!films.containsKey(newFilm.getId())) {
-            log.warn("Фильм с id = {} не найден", newFilm.getId());
-            throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
-        }
+        validateId(newFilm.getId());
 
         if (!"Success".equals(validation(newFilm))) {
             String errorMessage = validation(newFilm);
@@ -69,17 +69,28 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void addLike(long filmId, long userId) {
+        Film film = getFilmById(filmId);
+        userStorage.validateId(userId);
 
+        film.getLikes().add(userId);
+        update(film);
     }
 
     @Override
     public void removeLike(long filmId, long userId) {
+        Film film = getFilmById(filmId);
+        userStorage.validateId(userId);
 
+        film.getLikes().remove(userId);
+        update(film);
     }
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        return new ArrayList<>();
+        return films.values().stream()
+                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private String validation(Film film) {
@@ -88,6 +99,18 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
 
         return "Success";
+    }
+
+    private Film getFilmById(long id) {
+        validateId(id);
+        return films.get(id);
+    }
+
+    private void validateId(long id) {
+        if (films.get(id) == null) {
+            log.warn("Фильм с id = {} не найден", id);
+            throw new NotFoundException("Фильм с id = " + id + " не найден");
+        }
     }
 
     private long getNextId() {

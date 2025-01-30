@@ -18,4 +18,6 @@ public interface UserStorage {
     Collection<User> getFriendList(long userId);
 
     Collection<User> getCommonFriends(long userId, long secondUserId);
+
+    void validateId(long id);
 }
