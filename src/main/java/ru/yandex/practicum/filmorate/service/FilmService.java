@@ -37,7 +37,6 @@ public class FilmService {
         return film;
     }
 
-
     public Film update(Film newFilm) {
         log.info("input film: {}", newFilm.toString());
 
