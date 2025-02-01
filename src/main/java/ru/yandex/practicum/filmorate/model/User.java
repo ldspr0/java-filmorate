@@ -8,12 +8,14 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 public class User {
     private Long id;
     private String name;
+    private Set<Long> friends;
 
     @PastOrPresent
     private LocalDate birthday;
