@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @SpringBootTest
 class FilmControllerTest {
-    private final FilmService serviceContext = new FilmService(new InMemoryFilmStorage(new InMemoryUserStorage()));;
+    private final FilmService serviceContext = new FilmService(new InMemoryFilmStorage(new InMemoryUserStorage()));
     private Film updateFilm;
     private Film newFilmBefore28;
     private Film newFilmAt28;
