@@ -6,15 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootTest
 class FilmControllerTest {
-    private final FilmStorage controller = new InMemoryFilmStorage();
+    private final FilmService serviceContext = new FilmService(new InMemoryFilmStorage(new InMemoryUserStorage()));;
     private Film updateFilm;
     private Film newFilmBefore28;
     private Film newFilmAt28;
@@ -29,7 +30,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 5, 5))
                 .build();
 
-        controller.create(film);
+        serviceContext.create(film);
 
         this.updateFilm = Film.builder()
                 .id(1L)
@@ -65,9 +66,9 @@ class FilmControllerTest {
 
     @Test
     public void isPossibleToUpdateFilm() {
-        controller.update(this.updateFilm);
+        serviceContext.update(this.updateFilm);
 
-        Optional<Film> updatedFilmOpt = controller.findAll().stream().findFirst();
+        Optional<Film> updatedFilmOpt = serviceContext.getAll().stream().findFirst();
         if (updatedFilmOpt.isEmpty()) {
             Assertions.fail("Фильм не найден.");
         }
@@ -83,34 +84,34 @@ class FilmControllerTest {
 
     @Test
     void isNotPossibleToCreateFilmWithNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> controller.create(null));
+        Assertions.assertThrows(NullPointerException.class, () -> serviceContext.create(null));
     }
 
     @Test
     void isNotPossibleToCreateFilmWithDateReleaseEarlierThan28dec1895() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.create(this.newFilmBefore28));
+        Assertions.assertThrows(ValidationException.class, () -> serviceContext.create(this.newFilmBefore28));
 
-        controller.create(this.newFilmAt28);
-        Assertions.assertEquals(2, controller.findAll().size());
+        serviceContext.create(this.newFilmAt28);
+        Assertions.assertEquals(2, serviceContext.getAll().size());
     }
 
     @Test
     void isNotPossibleToUpdateFilmWithNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> controller.update(null));
+        Assertions.assertThrows(NullPointerException.class, () -> serviceContext.update(null));
     }
 
     @Test
     void isNotPossibleToUpdateFilmWithNoId() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(filmWithNoId));
+        Assertions.assertThrows(ValidationException.class, () -> serviceContext.update(filmWithNoId));
     }
 
     @Test
     void isNotPossibleToUpdateFilmWithDateReleaseEarlierThan28dec1895() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(newFilmBefore28));
+        Assertions.assertThrows(ValidationException.class, () -> serviceContext.update(newFilmBefore28));
 
-        controller.update(newFilmAt28);
+        serviceContext.update(newFilmAt28);
 
-        Optional<Film> updatedFilmOpt = controller.findAll().stream().findFirst();
+        Optional<Film> updatedFilmOpt = serviceContext.getAll().stream().findFirst();
         if (updatedFilmOpt.isEmpty()) {
             Assertions.fail("Фильм не найден.");
         }

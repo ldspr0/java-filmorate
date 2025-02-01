@@ -1,88 +1,96 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Repository
+@Getter
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
-    private static final String MSG_RELEASEDATE_VALIDATION_ERROR = "Дата релиза фильма не может быть раньше 28 декабря 1895 года.";
-    private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
+    private final UserStorage userStorage;
+
     @Autowired
-    UserStorage userStorage;
+    public InMemoryFilmStorage(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @Override
-    public Collection<Film> findAll() {
-        log.trace("get all films: {}", films.values());
+    public Collection<Film> getAll() {
+        log.trace("get all films from Memory: {}", films.values());
         return films.values();
     }
 
     @Override
     public Film create(Film film) {
-        log.info("input film: {}", film.toString());
-
-        if (!"Success".equals(validation(film))) {
-            String errorMessage = validation(film);
-            log.warn(errorMessage);
-            throw new ValidationException(errorMessage);
-        }
-
+        log.info("try to save film in Memory: {}", film.toString());
         film.setId(getNextId());
         film.setLikes(new HashSet<>());
         films.put(film.getId(), film);
+        log.info("film is saved in Memory: {}", film);
         return film;
     }
 
     @Override
+    public Film read(long id) {
+        log.info("film returned from Memory: {}", films.get(id));
+        return films.get(id);
+    }
+
+    @Override
     public Film update(Film newFilm) {
-        log.info("input film: {}", newFilm.toString());
-
-        // проверяем необходимые условия
-        if (newFilm.getId() == null) {
-            log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
-            throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
-        }
-        validateId(newFilm.getId());
-
-        if (!"Success".equals(validation(newFilm))) {
-            String errorMessage = validation(newFilm);
-            log.warn(errorMessage);
-            throw new ValidationException(errorMessage);
-        }
-
+        log.info("try to update film in Memory: {}", newFilm.toString());
         Film oldFilm = films.get(newFilm.getId());
         oldFilm.setName(newFilm.getName());
         oldFilm.setDescription(newFilm.getDescription());
         oldFilm.setReleaseDate(newFilm.getReleaseDate());
         oldFilm.setDuration(newFilm.getDuration());
+        log.info("film updated in Memory: {}", newFilm);
         return oldFilm;
     }
 
     @Override
-    public void addLike(long filmId, long userId) {
-        Film film = getFilmById(filmId);
-        userStorage.validateId(userId);
-
-        film.getLikes().add(userId);
-        update(film);
+    public boolean delete(long id) {
+        if (read(id) == null) {
+            return false;
+        }
+        films.remove(id);
+        log.info("film with id {} is removed from Memory", id);
+        return true;
     }
 
     @Override
-    public void removeLike(long filmId, long userId) {
-        Film film = getFilmById(filmId);
-        userStorage.validateId(userId);
+    public boolean addLike(long filmId, long userId) {
+        try {
+            Film film = read(filmId);
+            film.getLikes().add(userId);
+            update(film);
+            log.info("like from userId: {} is added to filmId: {} from Memory", userId, filmId);
+            return true;
+        } catch (RuntimeException e) {
+            log.warn("issue with addLike with filmId: {} and userId: {}. error: {}", filmId, userId, e.getMessage());
+            return false;
+        }
+    }
 
-        film.getLikes().remove(userId);
-        update(film);
+    @Override
+    public boolean removeLike(long filmId, long userId) {
+        try {
+            Film film = read(filmId);
+            film.getLikes().remove(userId);
+            update(film);
+            log.info("like from userId: {} is removed from filmId: {} from Memory", userId, filmId);
+            return true;
+        } catch (RuntimeException e) {
+            log.warn("issue with removeLike with filmId: {} and userId: {}. error: {}", filmId, userId, e.getMessage());
+            return false;
+        }
     }
 
     @Override
@@ -91,26 +99,6 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
                 .limit(count)
                 .collect(Collectors.toList());
-    }
-
-    private String validation(Film film) {
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            return MSG_RELEASEDATE_VALIDATION_ERROR;
-        }
-
-        return "Success";
-    }
-
-    private Film getFilmById(long id) {
-        validateId(id);
-        return films.get(id);
-    }
-
-    private void validateId(long id) {
-        if (films.get(id) == null) {
-            log.warn("Фильм с id = {} не найден", id);
-            throw new NotFoundException("Фильм с id = " + id + " не найден");
-        }
     }
 
     private long getNextId() {

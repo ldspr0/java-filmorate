@@ -18,6 +18,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <logbook.version>3.7.2</logbook.version>
     </properties>
     <dependencies>
         <dependency>
@@ -41,7 +43,7 @@
         <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
-            <version>3.7.2</version>
+            <version>${logbook.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

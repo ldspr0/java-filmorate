@@ -1,109 +1,107 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Repository
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
-    private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
 
     @Override
-    public Collection<User> findAll() {
-        log.trace("get all users: {}", users.values());
+    public Collection<User> getAll() {
+        log.trace("get all users from Memory: {}", users.values());
         return users.values();
     }
 
     @Override
     public User create(User user) {
-        log.info("input user: {}", user.toString());
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.trace("name is set to login: {}", user.getLogin());
-        }
-
+        log.info("try to save user in Memory: {}", user.toString());
         user.setId(getNextId());
+        user.setFriends(new HashSet<>());
         users.put(user.getId(), user);
+        log.info("user is saved in Memory: {}", user);
         return user;
     }
 
     @Override
+    public User read(long id) {
+        return users.get(id);
+    }
+
+    @Override
     public User update(User newUser) {
-        log.info("input user: {}", newUser.toString());
-
-        if (newUser.getId() == null) {
-            log.warn(MSG_ID_REQUIRED_VALIDATION_ERROR);
-            throw new ValidationException(MSG_ID_REQUIRED_VALIDATION_ERROR);
-        }
-
-        validateId(newUser.getId());
-
+        log.info("try to update user in Memory: {}", newUser.toString());
         User oldUser = users.get(newUser.getId());
         oldUser.setEmail(newUser.getEmail());
         oldUser.setLogin(newUser.getLogin());
-
-        if (newUser.getName() == null || newUser.getName().isBlank()) {
-            oldUser.setName(oldUser.getLogin());
-            log.trace("name is set to login: {}", oldUser.getLogin());
-        } else {
-            oldUser.setName(newUser.getName());
-        }
-
-        if (newUser.getBirthday() != null) {
-            oldUser.setBirthday(newUser.getBirthday());
-        }
-
+        oldUser.setName(newUser.getName());
+        oldUser.setBirthday(newUser.getBirthday());
+        log.info("user is updated in Memory: {}", newUser);
         return oldUser;
     }
 
     @Override
-    public void addFriend(long userId, long friendId) {
-        User user = getUserById(userId);
-        User friendUser = getUserById(friendId);
+    public boolean delete(long id) {
+        if (read(id) == null) {
+            return false;
+        }
+        users.remove(id);
+        log.info("user with id {} is removed from Memory", id);
+        return true;
+    }
 
-        addFriend(user, friendId);
-        addFriend(friendUser, userId);
+    @Override
+    public boolean addFriend(long userId, long friendId) {
+        try {
+            User user = read(userId);
+            User friendUser = read(friendId);
+            addFriend(user, friendId);
+            addFriend(friendUser, userId);
+            log.info("userId: {} is now a friend with friendId: {} ", userId, friendId);
+            return true;
+        } catch (RuntimeException e) {
+            log.warn("issue with addFriend with userId: {} and friendId: {}. error: {}", userId, friendId, e.getMessage());
+            return false;
+        }
     }
 
     private void addFriend(User user, long friendId) {
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
-
         user.getFriends().add(friendId);
         update(user);
     }
 
     @Override
-    public void removeFriend(long userId, long friendId) {
-        User user = getUserById(userId);
-        User friendUser = getUserById(friendId);
+    public boolean removeFriend(long userId, long friendId) {
+        try {
+            User user = read(userId);
+            User friendUser = read(friendId);
+            removeFriend(user, friendId);
+            removeFriend(friendUser, userId);
+            log.info("userId: {} and friendId: {} not a friends anymore ", userId, friendId);
+            return true;
+        } catch (RuntimeException e) {
+            log.warn("issue with removeFriend with userId: {} and friendId: {}. error: {}", userId, friendId, e.getMessage());
+            return false;
+        }
 
-        removeFriend(user, friendId);
-        removeFriend(friendUser, userId);
     }
 
     private void removeFriend(User user, long friendId) {
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
-
         user.getFriends().remove(friendId);
         update(user);
     }
 
     @Override
     public Collection<User> getFriendList(long userId) {
-        validateId(userId);
-
         return users.values().stream()
                 .filter(user -> user.getFriends() != null && user.getFriends().contains(userId))
                 .collect(Collectors.toSet());
@@ -111,25 +109,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> getCommonFriends(long userId, long secondUserId) {
-        validateId(userId);
-        validateId(secondUserId);
-
         return users.values().stream()
                 .filter(user -> user.getFriends() != null && user.getFriends().contains(userId) && user.getFriends().contains(secondUserId))
                 .collect(Collectors.toSet());
-    }
-
-    private User getUserById(long id) {
-        validateId(id);
-        return users.get(id);
-    }
-
-    @Override
-    public void validateId(long id) {
-        if (users.get(id) == null) {
-            log.warn("Пользователь с id = {} не найден", id);
-            throw new NotFoundException("Пользователь с id = " + id + " не найден");
-        }
     }
 
     private long getNextId() {

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @SpringBootTest
 class UserControllerTest {
-    private final UserStorage controller = new InMemoryUserStorage();
+    private final UserService serviceContext = new UserService(new InMemoryUserStorage());
     private User updateUser;
     private User userWithEmptyName;
     private User userWithNoId;
@@ -30,7 +30,7 @@ class UserControllerTest {
                 .birthday(LocalDate.of(2000, 5, 5))
                 .build();
 
-        controller.create(user);
+        serviceContext.create(user);
 
         this.updateUser = User.builder()
                 .id(1L)
@@ -57,9 +57,9 @@ class UserControllerTest {
 
     @Test
     public void isPossibleToUpdateUser() {
-        controller.update(updateUser);
+        serviceContext.update(updateUser);
 
-        Optional<User> updatedUserOpt = controller.findAll().stream().findFirst();
+        Optional<User> updatedUserOpt = serviceContext.getAll().stream().findFirst();
         if (updatedUserOpt.isEmpty()) {
             Assertions.fail("Юзер не найден.");
         }
@@ -75,14 +75,14 @@ class UserControllerTest {
 
     @Test
     void isNotPossibleToCreateUserWithNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> controller.create(null));
+        Assertions.assertThrows(NullPointerException.class, () -> serviceContext.create(null));
     }
 
     @Test
     void isPossibleToCreateUserWithEmptyName() {
-        controller.create(userWithEmptyName);
+        serviceContext.create(userWithEmptyName);
 
-        List<User> userCreatedWithoutName = controller.findAll().stream()
+        List<User> userCreatedWithoutName = serviceContext.getAll().stream()
                 .filter(user -> user.getId() == 2L && Objects.equals(user.getLogin(), user.getName()))
                 .toList();
         Assertions.assertEquals(1, userCreatedWithoutName.size());
@@ -91,19 +91,19 @@ class UserControllerTest {
 
     @Test
     void isNotPossibleToUpdateUserWithNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> controller.update(null));
+        Assertions.assertThrows(NullPointerException.class, () -> serviceContext.update(null));
     }
 
     @Test
     void isNotPossibleToUPdateUserWithNoId() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.update(userWithNoId));
+        Assertions.assertThrows(ValidationException.class, () -> serviceContext.update(userWithNoId));
     }
 
     @Test
     void isPossibleToUpdateUserWithEmptyName() {
-        controller.update(userWithEmptyName);
+        serviceContext.update(userWithEmptyName);
 
-        List<User> userCreatedWithoutName = controller.findAll().stream()
+        List<User> userCreatedWithoutName = serviceContext.getAll().stream()
                 .filter(user -> user.getId() == 1L && Objects.equals(user.getLogin(), user.getName()))
                 .toList();
         Assertions.assertEquals(1, userCreatedWithoutName.size());
