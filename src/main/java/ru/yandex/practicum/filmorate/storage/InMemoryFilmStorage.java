@@ -1,25 +1,24 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
 @Getter
+@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private final UserStorage userStorage;
-
-    @Autowired
-    public InMemoryFilmStorage(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     @Override
     public Collection<Film> getAll() {

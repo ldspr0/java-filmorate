@@ -18,6 +18,7 @@ public class FilmService implements ServiceLayer<Film> {
     private final FilmStorage filmStorage;
     private static final String MSG_RELEASEDATE_VALIDATION_ERROR = "Дата релиза фильма не может быть раньше 28 декабря 1895 года.";
     private static final String MSG_ID_REQUIRED_VALIDATION_ERROR = "Id должен быть указан.";
+    private static final String VALIDATION_SUCESS = "Success";
 
     @Override
     public Collection<Film> getAll() {
@@ -36,7 +37,7 @@ public class FilmService implements ServiceLayer<Film> {
 
     @Override
     public Film create(Film film) {
-        if (!"Success".equals(validation(film))) {
+        if (!VALIDATION_SUCESS.equals(validation(film))) {
             String errorMessage = validation(film);
             log.warn(errorMessage);
             throw new ValidationException(errorMessage);
@@ -53,7 +54,7 @@ public class FilmService implements ServiceLayer<Film> {
         }
         read(newFilm.getId());
 
-        if (!"Success".equals(validation(newFilm))) {
+        if (!VALIDATION_SUCESS.equals(validation(newFilm))) {
             String errorMessage = validation(newFilm);
             log.warn(errorMessage);
             throw new ValidationException(errorMessage);
@@ -77,7 +78,7 @@ public class FilmService implements ServiceLayer<Film> {
             return MSG_RELEASEDATE_VALIDATION_ERROR;
         }
 
-        return "Success";
+        return VALIDATION_SUCESS;
     }
 
 }
