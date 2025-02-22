@@ -14,7 +14,9 @@ import ru.yandex.practicum.filmorate.rowmapper.MpaRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -35,9 +37,10 @@ public class MpaDbStorage implements Storage<Mpa> {
 
     @Override
     public Mpa create(Mpa entity) {
+        Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
         List<Object> params = Arrays.asList(entity.getName(),
-                LocalDate.now(),
-                LocalDate.now()
+                timestampNow,
+                timestampNow
         );
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -72,11 +75,12 @@ public class MpaDbStorage implements Storage<Mpa> {
 
     @Override
     public Mpa update(Mpa entity) {
+        Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
         List<Object> params = Arrays.asList(entity.getName(),
-                LocalDate.now(),
+                timestampNow,
                 entity.getId()
         );
-        int rowsUpdated = jdbcTemplate.update(UPDATE_MPAS, params);
+        int rowsUpdated = jdbcTemplate.update(UPDATE_MPAS, params.toArray());
         if (rowsUpdated == 0) {
             throw new InternalServerException("Не удалось обновить данные");
         }

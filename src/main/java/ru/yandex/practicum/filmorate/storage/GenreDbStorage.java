@@ -76,7 +76,7 @@ public class GenreDbStorage implements Storage<Genre> {
                 LocalDate.now(),
                 entity.getId()
         );
-        int rowsUpdated = jdbcTemplate.update(UPDATE_GENRES, params);
+        int rowsUpdated = jdbcTemplate.update(UPDATE_GENRES, params.toArray());
         if (rowsUpdated == 0) {
             throw new InternalServerException("Не удалось обновить данные");
         }
