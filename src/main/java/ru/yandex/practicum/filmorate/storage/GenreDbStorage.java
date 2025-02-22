@@ -14,7 +14,8 @@ import ru.yandex.practicum.filmorate.rowmapper.GenreRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -35,9 +36,10 @@ public class GenreDbStorage implements Storage<Genre> {
 
     @Override
     public Genre create(Genre entity) {
+        Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
         List<Object> params = Arrays.asList(entity.getName(),
-                LocalDate.now(),
-                LocalDate.now()
+                timestampNow,
+                timestampNow
         );
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -72,8 +74,9 @@ public class GenreDbStorage implements Storage<Genre> {
 
     @Override
     public Genre update(Genre entity) {
+        Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
         List<Object> params = Arrays.asList(entity.getName(),
-                LocalDate.now(),
+                timestampNow,
                 entity.getId()
         );
         int rowsUpdated = jdbcTemplate.update(UPDATE_GENRES, params.toArray());
