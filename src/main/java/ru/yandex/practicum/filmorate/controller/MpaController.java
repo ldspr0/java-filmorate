@@ -9,7 +9,7 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/mpas")
+@RequestMapping("/mpa")
 public class MpaController {
     private final MpaService mpaService;
 
