@@ -60,12 +60,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User create(User entity) {
+        Date birthday = Date.valueOf(entity.getBirthday());
         Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
 
         List<Object> params = Arrays.asList(entity.getName(),
                 entity.getLogin(),
                 entity.getEmail(),
-                entity.getBirthday().toString(),
+                birthday,
                 timestampNow,
                 timestampNow
         );
@@ -101,7 +102,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User entity) {
-        log.info("entity: " + entity);
         Date birthday = Date.valueOf(entity.getBirthday());
         Timestamp updatedAt = Timestamp.valueOf(LocalDateTime.now());
 
@@ -112,7 +112,6 @@ public class UserDbStorage implements UserStorage {
                 updatedAt,
                 entity.getId()
         );
-        log.info("params: " + params);
         int rowsUpdated = jdbcTemplate.update(UPDATE_USERS, params.toArray());
         if (rowsUpdated == 0) {
             throw new InternalServerException("Не удалось обновить данные");

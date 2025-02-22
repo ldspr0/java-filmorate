@@ -23,8 +23,8 @@ public class SqlConstants {
     public static final String UPDATE_USERS = "UPDATE users SET name = ?, login = ?, email = ?, birthday = ?, updated_at = ? WHERE id = ?";
     public static final String DELETE_USERS = "Delete FROM users WHERE id = ?";
 
-    public static final String GET_FILMS = "SELECT id, name FROM films";
-    public static final String GET_FILMS_BY_ID = "SELECT id, name FROM films WHERE id = ?";
+    public static final String GET_FILMS = "SELECT id, name, description, genre, mpa_rating, duration, release_date FROM films";
+    public static final String GET_FILMS_BY_ID = "SELECT id, name, description, genre, mpa_rating, duration, release_date FROM films WHERE id = ?";
     public static final String INSERT_FILMS = "INSERT INTO films(name, description, genre, mpa_rating, duration, release_date, created_at, updated_at)" +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     public static final String UPDATE_FILMS = "UPDATE films SET name = ?, description = ?, genre = ?, mpa_rating = ?, duration = ?, release_date = ?, updated_at = ? WHERE id = ?";
