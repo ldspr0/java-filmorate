@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS likes (
 CREATE TABLE IF NOT EXISTS friends (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
-    friend_id BIGINT NOT NULL REFERENCES films(id),
+    friend_id BIGINT NOT NULL REFERENCES users(id),
     status friendship_status DEFAULT 'Pending',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL
