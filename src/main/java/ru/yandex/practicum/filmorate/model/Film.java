@@ -15,19 +15,13 @@ public class Film {
     private Long id;
     private LocalDate releaseDate;
     private Set<Long> likes;
-
-    @Positive
-    private long genreId;
-
-    @Positive
-    private long mpaId;
-
+    private Set<Genre> genres;
+    private Mpa mpa;
     @NotBlank
     private String name;
-
     @Length(max = 200)
     private String description;
-
     @Positive
     private Integer duration;
+
 }
