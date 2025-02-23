@@ -23,6 +23,17 @@ public class SqlConstants {
     public static final String UPDATE_USERS = "UPDATE users SET name = ?, login = ?, email = ?, birthday = ?, updated_at = ? WHERE id = ?";
     public static final String DELETE_USERS = "Delete FROM users WHERE id = ?";
 
+    public static final String GET_FRIENDS = "SELECT u.id, u.name, u.login, u.email, u.birthday FROM friends f LEFT JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?";
+    public static final String GET_COMMON_FRIENDS = "SELECT u.id, u.name, u.login, u.email, u.birthday\n" +
+            "FROM friends f1\n" +
+            "INNER JOIN friends f2 ON f1.friend_id = f2.friend_id\n" +
+            "INNER JOIN users u ON f1.friend_id = u.id\n" +
+            "WHERE f1.user_id = ? AND f2.user_id = ?";
+    public static final String INSERT_FRIENDS = "INSERT INTO friends(user_id, friend_id, status, created_at, updated_at)" +
+            "VALUES (?, ?, ?, ?, ?)";
+    public static final String DELETE_FRIENDS = "Delete FROM friends WHERE user_id = ? AND friend_id = ?";
+
+
     public static final String GET_FILMS = "SELECT id, name, description, genre, mpa_rating, duration, release_date FROM films";
     public static final String GET_FILMS_BY_ID = "SELECT id, name, description, genre, mpa_rating, duration, release_date FROM films WHERE id = ?";
     public static final String INSERT_FILMS = "INSERT INTO films(name, description, genre, mpa_rating, duration, release_date, created_at, updated_at)" +

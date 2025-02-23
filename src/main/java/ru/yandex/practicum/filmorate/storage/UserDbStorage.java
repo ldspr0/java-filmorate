@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.enums.StatusFriendship;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -34,22 +35,56 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public boolean addFriend(long userId, long friendId) {
-        return false;
+        Timestamp timestampNow = Timestamp.valueOf(LocalDateTime.now());
+
+        List<Object> params = Arrays.asList(userId,
+                friendId,
+                StatusFriendship.PENDING.name(),
+                timestampNow,
+                timestampNow
+        );
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection
+                    .prepareStatement(INSERT_FRIENDS, Statement.RETURN_GENERATED_KEYS);
+            for (int idx = 0; idx < params.size(); idx++) {
+                ps.setObject(idx + 1, params.get(idx));
+            }
+            return ps;
+        }, keyHolder);
+
+        Long id = keyHolder.getKeyAs(Long.class);
+
+        if (id != null) {
+            return true;
+        } else {
+            throw new InternalServerException("Не удалось сохранить данные");
+        }
+
     }
 
     @Override
     public boolean removeFriend(long userId, long friendId) {
-        return false;
+
+        return jdbcTemplate.update(DELETE_FRIENDS, userId, friendId) > 0;
     }
 
     @Override
     public Collection<User> getFriendList(long userId) {
-        return List.of();
+        try {
+            return jdbcTemplate.query(GET_FRIENDS + ADD_LIMIT, userRowMapper, userId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Друзей у данного юзера не найдено.");
+        }
     }
 
     @Override
     public Collection<User> getCommonFriends(long userId, long secondUserId) {
-        return List.of();
+        try {
+            return jdbcTemplate.query(GET_COMMON_FRIENDS + ADD_LIMIT, userRowMapper, userId, secondUserId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("У данных пользователей нет общих друзей.");
+        }
     }
 
     @Override
