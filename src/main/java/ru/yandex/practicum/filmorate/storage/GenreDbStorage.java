@@ -49,7 +49,7 @@ public class GenreDbStorage implements Storage<Genre> {
             return ps;
         }, keyHolder);
 
-        Integer id = keyHolder.getKeyAs(Integer.class);
+        Long id = keyHolder.getKeyAs(Long.class);
 
         if (id != null) {
             entity.setId(id);

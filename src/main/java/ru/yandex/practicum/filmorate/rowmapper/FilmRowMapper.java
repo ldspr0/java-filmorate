@@ -25,7 +25,7 @@ public class FilmRowMapper implements RowMapper<Film> {
 
         // Маппинг Mpa
         Mpa mpa = Mpa.builder()
-                .id(rs.getInt("mpa_id"))
+                .id(rs.getLong("mpa_id"))
                 .name(rs.getString("mpa_name"))
                 .build();
         film.setMpa(mpa);
@@ -39,7 +39,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                     .map(genreEntry -> {
                         String[] parts = genreEntry.split(": ");
                         if (parts.length == 2) {
-                            int id = Integer.parseInt(parts[0]);
+                            long id = Integer.parseInt(parts[0]);
                             String name = parts[1];
                             return Genre.builder()
                                     .id(id)
