@@ -53,7 +53,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAll() {
-        return jdbcTemplate.query(GET_FILMS + ADD_LIMIT, filmRowMapper);
+        return jdbcTemplate.query(GET_FILMS, filmRowMapper);
     }
 
 
@@ -108,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film read(long id) {
         try {
-            return jdbcTemplate.queryForObject(GET_FILMS_BY_ID + ADD_LIMIT, filmRowMapper, id);
+            return jdbcTemplate.queryForObject(GET_FILMS_BY_ID, filmRowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Жанр с таким Id не был найден");
         }

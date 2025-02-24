@@ -31,7 +31,7 @@ public class GenreDbStorage implements Storage<Genre> {
 
     @Override
     public Collection<Genre> getAll() {
-        return jdbcTemplate.query(GET_GENRES + ADD_LIMIT, genreRowMapper);
+        return jdbcTemplate.query(GET_GENRES, genreRowMapper);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GenreDbStorage implements Storage<Genre> {
     @Override
     public Genre read(long id) {
         try {
-            return jdbcTemplate.queryForObject(GET_GENRES_BY_ID + ADD_LIMIT, genreRowMapper, id);
+            return jdbcTemplate.queryForObject(GET_GENRES_BY_ID, genreRowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Жанр с таким Id не был найден");
         }

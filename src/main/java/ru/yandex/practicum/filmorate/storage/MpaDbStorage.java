@@ -31,7 +31,7 @@ public class MpaDbStorage implements Storage<Mpa> {
 
     @Override
     public Collection<Mpa> getAll() {
-        return jdbcTemplate.query(GET_MPAS + ADD_LIMIT, mpaRowMapper);
+        return jdbcTemplate.query(GET_MPAS, mpaRowMapper);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class MpaDbStorage implements Storage<Mpa> {
     @Override
     public Mpa read(long id) {
         try {
-            return jdbcTemplate.queryForObject(GET_MPAS_BY_ID + ADD_LIMIT, mpaRowMapper, id);
+            return jdbcTemplate.queryForObject(GET_MPAS_BY_ID, mpaRowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Жанр с таким Id не был найден");
         }

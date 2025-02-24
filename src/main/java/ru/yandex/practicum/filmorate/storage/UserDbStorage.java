@@ -72,7 +72,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getFriendList(long userId) {
         try {
-            return jdbcTemplate.query(GET_FRIENDS + ADD_LIMIT, userRowMapper, userId);
+            return jdbcTemplate.query(GET_FRIENDS, userRowMapper, userId);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Друзей у данного юзера не найдено.");
         }
@@ -81,7 +81,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getCommonFriends(long userId, long secondUserId) {
         try {
-            return jdbcTemplate.query(GET_COMMON_FRIENDS + ADD_LIMIT, userRowMapper, userId, secondUserId);
+            return jdbcTemplate.query(GET_COMMON_FRIENDS, userRowMapper, userId, secondUserId);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("У данных пользователей нет общих друзей.");
         }
@@ -89,7 +89,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAll() {
-        return jdbcTemplate.query(GET_USERS + ADD_LIMIT, userRowMapper);
+        return jdbcTemplate.query(GET_USERS, userRowMapper);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User read(long id) {
         try {
-            return jdbcTemplate.queryForObject(GET_USERS_BY_ID + ADD_LIMIT, userRowMapper, id);
+            return jdbcTemplate.queryForObject(GET_USERS_BY_ID, userRowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Жанр с таким Id не был найден");
         }
