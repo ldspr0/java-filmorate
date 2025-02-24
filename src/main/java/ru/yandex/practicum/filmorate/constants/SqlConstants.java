@@ -45,7 +45,11 @@ public class SqlConstants {
                     FROM film_genre fg
                     INNER JOIN genres g ON g.id = fg.genre_id
                     WHERE fg.film_id = f.id
-                ) AS genres
+                ) AS genres,
+                (SELECT LISTAGG(DISTINCT lk.user_id, ', ')
+                    FROM likes lk
+                    WHERE lk.film_id = f.id
+                ) AS likes
             FROM films f
             INNER JOIN mpas m ON f.mpa_rating = m.id
             """;
@@ -65,7 +69,6 @@ public class SqlConstants {
             "VALUES (?, ?, ?, ?)";
 
     // Likes
-    public static final String GET_LIKES = "SELECT film_id, user_id FROM likes";
     public static final String INSERT_LIKE = "INSERT INTO likes (film_id, user_id, created_at, updated_at) VALUES (?, ?, ?, ?)";
     public static final String DELETE_LIKE = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
 }

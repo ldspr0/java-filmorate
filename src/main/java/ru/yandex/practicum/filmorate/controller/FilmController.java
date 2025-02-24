@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,7 +12,6 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 @RestController
-@Slf4j
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;

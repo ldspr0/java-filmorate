@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,7 +24,6 @@ import java.util.*;
 
 import static ru.yandex.practicum.filmorate.constants.SqlConstants.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 @Primary

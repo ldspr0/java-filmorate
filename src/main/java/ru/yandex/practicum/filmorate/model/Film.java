@@ -17,10 +17,13 @@ public class Film {
     private Set<Long> likes;
     private Set<Genre> genres;
     private Mpa mpa;
+
     @NotBlank
     private String name;
+
     @Length(max = 200)
     private String description;
+
     @Positive
     private Integer duration;
 

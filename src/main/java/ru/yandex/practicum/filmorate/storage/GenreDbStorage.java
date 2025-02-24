@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,7 +21,6 @@ import java.util.List;
 
 import static ru.yandex.practicum.filmorate.constants.SqlConstants.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class GenreDbStorage implements Storage<Genre> {
