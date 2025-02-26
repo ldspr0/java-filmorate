@@ -16,7 +16,6 @@ public class Film {
     private Long id;
     private LocalDate releaseDate;
     private Set<Long> likes;
-    @NotNull
     private Set<Genre> genres;
 
     @NotNull
